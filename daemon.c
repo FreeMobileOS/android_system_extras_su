@@ -31,7 +31,6 @@
 #include <getopt.h>
 #include <stdint.h>
 #include <pwd.h>
-#include <sys/mount.h>
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <sys/types.h>
@@ -42,7 +41,6 @@
 #include <string.h>
 #include <log/log.h>
 
-#include <cutils/multiuser.h>
 
 #include "su.h"
 #include "utils.h"
@@ -217,41 +215,6 @@ static void write_string(int fd, char* val) {
     }
 }
 
-static void mount_emulated_storage(int user_id) {
-    const char *emulated_source = getenv("EMULATED_STORAGE_SOURCE");
-    const char *emulated_target = getenv("EMULATED_STORAGE_TARGET");
-    const char* legacy = getenv("EXTERNAL_STORAGE");
-
-    if (!emulated_source || !emulated_target) {
-        // No emulated storage is present
-        return;
-    }
-
-    // Create a second private mount namespace for our process
-    if (unshare(CLONE_NEWNS) < 0) {
-        PLOGE("unshare");
-        return;
-    }
-
-    if (mount("rootfs", "/", NULL, MS_SLAVE | MS_REC, NULL) < 0) {
-        PLOGE("mount rootfs as slave");
-        return;
-    }
-
-    // /mnt/shell/emulated -> /storage/emulated
-    if (mount(emulated_source, emulated_target, NULL, MS_BIND, NULL) < 0) {
-        PLOGE("mount emulated storage");
-    }
-
-    char target_user[PATH_MAX];
-    snprintf(target_user, PATH_MAX, "%s/%d", emulated_target, user_id);
-
-    // /mnt/shell/emulated/<user> -> /storage/emulated/legacy
-    if (mount(target_user, legacy, NULL, MS_BIND | MS_REC, NULL) < 0) {
-        PLOGE("mount legacy path");
-    }
-}
-
 static int run_daemon_child(int infd, int outfd, int errfd, int argc, char** argv) {
     if (-1 == dup2(outfd, STDOUT_FILENO)) {
         PLOGE("dup2 child outfd");
@@ -295,7 +258,6 @@ static int daemon_accept(int fd) {
 
     daemon_from_uid = credentials.uid;
 
-    int mount_storage = read_int(fd);
     // The the FDs for each of the streams
     int infd  = recv_fd(fd);
     int outfd = recv_fd(fd);
@@ -431,10 +393,6 @@ error:
         // ioctl(infd, TIOCSCTTY, 1);
     }
     free(pts_slave);
-
-    if (mount_storage) {
-        mount_emulated_storage(multiuser_get_user_id(daemon_from_uid));
-    }
 
     child_result = run_daemon_child(infd, outfd, errfd, argc, argv);
     for (i = 0; i < argc; i++) {
@@ -591,8 +549,6 @@ int connect_daemon(int argc, char *argv[], int ppid) {
 
     ALOGV("connecting client %d", getpid());
 
-    int mount_storage = getenv("MOUNT_EMULATED_STORAGE") != NULL;
-
     // Determine which one of our streams are attached to a TTY
     int atty = 0;
 
@@ -620,7 +576,6 @@ int connect_daemon(int argc, char *argv[], int ppid) {
     write_string(socketfd, pts_slave);
     // Parent PID
     write_int(socketfd, ppid);
-    write_int(socketfd, mount_storage);
 
     // Send stdin
     if (atty & ATTY_IN) {
@@ -649,15 +604,9 @@ int connect_daemon(int argc, char *argv[], int ppid) {
         send_fd(socketfd, STDERR_FILENO);
     }
 
-    // Number of command line arguments
-    write_int(socketfd, mount_storage ? argc - 1 : argc);
-
     // Command line arguments
     int i;
     for (i = 0; i < argc; i++) {
-        if (i == 1 && mount_storage) {
-            continue;
-        }
         write_string(socketfd, argv[i]);
     }
 
