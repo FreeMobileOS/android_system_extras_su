@@ -49,7 +49,7 @@ int fork_zero_fucks() {
     }
 }
 
-static int from_init(struct su_initiator *from) {
+static int from_init(struct su_initiator* from) {
     char path[PATH_MAX], exe[PATH_MAX];
     char args[4096], *argv0, *argv_rest;
     int fd;
@@ -119,7 +119,7 @@ static int from_init(struct su_initiator *from) {
         return -1;
     }
 
-    struct passwd *pw;
+    struct passwd* pw;
     pw = getpwuid(from->uid);
     if (pw && pw->pw_name) {
         if (strlcpy(from->name, pw->pw_name, sizeof(from->name)) >= sizeof(from->name)) {
@@ -131,8 +131,8 @@ static int from_init(struct su_initiator *from) {
     return 0;
 }
 
-static void populate_environment(const struct su_context *ctx) {
-    struct passwd *pw;
+static void populate_environment(const struct su_context* ctx) {
+    struct passwd* pw;
 
     if (ctx->to.keepenv)
         return;
@@ -171,7 +171,7 @@ void set_identity(unsigned int uid) {
 }
 
 static void usage(int status) {
-    FILE *stream = (status == EXIT_SUCCESS) ? stdout : stderr;
+    FILE* stream = (status == EXIT_SUCCESS) ? stdout : stderr;
 
     fprintf(stream,
     "Usage: su [options] [--] [-] [LOGIN] [--] [args...]\n\n"
@@ -189,20 +189,20 @@ static void usage(int status) {
     exit(status);
 }
 
-static __attribute__ ((noreturn)) void deny(struct su_context *ctx) {
-    char *cmd = get_command(&ctx->to);
+static __attribute__ ((noreturn)) void deny(struct su_context* ctx) {
+    char* cmd = get_command(&ctx->to);
     ALOGW("request rejected (%u->%u %s)", ctx->from.uid, ctx->to.uid, cmd);
     fprintf(stderr, "%s\n", strerror(EACCES));
     exit(EXIT_FAILURE);
 }
 
-static __attribute__ ((noreturn)) void allow(struct su_context *ctx, const char *packageName) {
-    char *arg0;
+static __attribute__ ((noreturn)) void allow(struct su_context* ctx, const char* packageName) {
+    char* arg0;
     int argc, err;
 
     umask(ctx->umask);
 
-    char *binary;
+    char* binary;
     argc = ctx->to.optind;
     if (ctx->to.command) {
         binary = ctx->to.shell;
@@ -225,7 +225,7 @@ static __attribute__ ((noreturn)) void allow(struct su_context *ctx, const char 
     arg0 = (arg0) ? arg0 + 1 : binary;
     if (ctx->to.login) {
         int s = strlen(arg0) + 2;
-        char *p = malloc(s);
+        char* p = malloc(s);
 
         if (!p)
             exit(EXIT_FAILURE);
@@ -279,8 +279,8 @@ static __attribute__ ((noreturn)) void allow(struct su_context *ctx, const char 
  * and can't trust the location of the property workspace.
  * Find the properties ourselves.
  */
-int access_disabled(const struct su_initiator *from) {
-    char *data;
+int access_disabled(const struct su_initiator* from) {
+    char* data;
     char build_type[PROPERTY_VALUE_MAX];
     char debuggable[PROPERTY_VALUE_MAX], enabled[PROPERTY_VALUE_MAX];
     size_t len;
@@ -336,7 +336,7 @@ int access_disabled(const struct su_initiator *from) {
     return 0;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     if (getuid() != geteuid()) {
         ALOGE("must not be a setuid binary");
         return 1;
@@ -345,7 +345,7 @@ int main(int argc, char *argv[]) {
     return su_main(argc, argv, 1);
 }
 
-int su_main(int argc, char *argv[], int need_client) {
+int su_main(int argc, char* argv[], int need_client) {
     // start up in daemon mode if prompted
     if (argc == 2 && strcmp(argv[1], "--daemon") == 0) {
         return run_daemon();

@@ -85,7 +85,7 @@ static int recv_fd(int sockfd) {
         goto error;
     }
 
-    struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
+    struct cmsghdr* cmsg = CMSG_FIRSTHDR(&msg);
 
     if (cmsg             == NULL                  ||
         cmsg->cmsg_len   != CMSG_LEN(sizeof(int)) ||
@@ -96,7 +96,7 @@ error:
         exit(-1);
     }
 
-    return *(int *)CMSG_DATA(cmsg);
+    return *(int*)CMSG_DATA(cmsg);
 }
 
 /*
@@ -134,7 +134,7 @@ static void send_fd(int sockfd, int fd) {
             msg.msg_control    = cmsgbuf;
             msg.msg_controllen = sizeof(cmsgbuf);
 
-            struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
+            struct cmsghdr* cmsg = CMSG_FIRSTHDR(&msg);
             if (!cmsg) {
                 goto error;
             }
@@ -508,7 +508,7 @@ static void setup_sighandlers(void) {
     }
 }
 
-int connect_daemon(int argc, char *argv[], int ppid) {
+int connect_daemon(int argc, char* argv[], int ppid) {
     int ptmx = -1;
     char pts_slave[PATH_MAX];
 

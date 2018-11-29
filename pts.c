@@ -36,7 +36,7 @@
  * Helper functions
  */
 // Ensures all the data is written out
-static int write_blocking(int fd, char *buf, size_t bufsz) {
+static int write_blocking(int fd, char* buf, size_t bufsz) {
     ssize_t ret, written;
 
     written = 0;
@@ -105,7 +105,7 @@ static void pump_async(int input, int output) {
  * on failure either -2 or -1 (errno set) is returned.
  * on success, the file descriptor of the master device is returned.
  */
-int pts_open(char *slave_name, size_t slave_name_size) {
+int pts_open(char* slave_name, size_t slave_name_size) {
     int fdm;
     char sn_tmp[slave_name_size];
 
@@ -210,7 +210,7 @@ static volatile int closing_time = 0;
  * Thread process. Wait for a SIGWINCH to be received, then update 
  * the terminal size.
  */
-static void *watch_sigwinch(void *data) {
+static void* watch_sigwinch(void* data) {
     sigset_t winch;
     int sig;
     int master = ((int *)data)[0];
@@ -264,7 +264,7 @@ static void *watch_sigwinch(void *data) {
  */
 int watch_sigwinch_async(int master, int slave) {
     pthread_t watcher;
-    int *files = (int *) malloc(sizeof(int) * 2);
+    int* files = (int*) malloc(sizeof(int) * 2);
     if (files == NULL) {
         return -1;
     }

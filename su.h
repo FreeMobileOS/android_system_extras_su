@@ -58,9 +58,9 @@ struct su_request {
     char name[64];
     int login;
     int keepenv;
-    char *shell;
-    char *command;
-    char **argv;
+    char* shell;
+    char* command;
+    char** argv;
     int argc;
     int optind;
 };
@@ -80,7 +80,7 @@ typedef enum {
 
 extern void set_identity(unsigned int uid);
 
-static inline char *get_command(const struct su_request *to)
+static inline char* get_command(const struct su_request* to)
 {
   if (to->command)
     return to->command;
@@ -92,12 +92,12 @@ static inline char *get_command(const struct su_request *to)
   return DEFAULT_SHELL;
 }
 
-int appops_start_op_su(int uid, const char *pkgName);
-int appops_finish_op_su(int uid, const char *pkgName);
+int appops_start_op_su(int uid, const char* pkgName);
+int appops_finish_op_su(int uid, const char* pkgName);
 
 int run_daemon();
-int connect_daemon(int argc, char *argv[], int ppid);
-int su_main(int argc, char *argv[], int need_client);
+int connect_daemon(int argc, char* argv[], int ppid);
+int su_main(int argc, char* argv[], int need_client);
 // for when you give zero fucks about the state of the child process.
 // this version of fork understands you don't care about the child.
 // deadbeat dad fork.

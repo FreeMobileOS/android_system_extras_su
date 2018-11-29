@@ -37,7 +37,7 @@
  * on failure either -2 or -1 (errno set) is returned.
  * on success, the file descriptor of the master device is returned.
  */
-int pts_open(char *slave_name, size_t slave_name_size);
+int pts_open(char* slave_name, size_t slave_name_size);
 
 /**
  * set_stdin_raw

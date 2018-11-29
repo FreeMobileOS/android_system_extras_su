@@ -28,10 +28,10 @@
 #include "utils.h"
 
 /* reads a file, making sure it is terminated with \n \0 */
-char* read_file(const char *fn)
+char* read_file(const char* fn)
 {
     struct stat st;
-    char *data = NULL;
+    char* data = NULL;
 
     int fd = open(fn, O_RDONLY);
     if (fd < 0) return data;
@@ -53,12 +53,12 @@ oops:
     return NULL;
 }
 
-int get_property(const char *data, char *found, const char *searchkey, const char *not_found)
+int get_property(const char* data, char* found, const char* searchkey, const char* not_found)
 {
     char *key, *value, *eol, *sol, *tmp;
     if (data == NULL) goto defval;
     int matched = 0;
-    char *dup = strdup(data);
+    char* dup = strdup(data);
     if (!dup)
         goto defval;
 
@@ -109,7 +109,7 @@ defval:
  * Assume nobody is stupid enough to put a propery with prefix ro.lineage.version
  * in his build.prop on a non-LineageOS ROM and comment it out.
  */
-int check_property(const char *data, const char *prefix)
+int check_property(const char* data, const char* prefix)
 {
     if (!data)
         return 0;
