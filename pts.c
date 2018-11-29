@@ -234,7 +234,7 @@ static void *watch_sigwinch(void *data) {
         // Set the new terminal size
         ioctl(slave, TIOCSWINSZ, &w);
 
-    } while (1);
+    } while (sigwait(&winch, &sig) == 0);
 
     free(data);
     return NULL;
@@ -289,8 +289,6 @@ int watch_sigwinch_async(int master, int slave) {
         return -1;
     }
 
-    // Set the initial terminal size
-    raise(SIGWINCH);
     return 0;
 }
 
