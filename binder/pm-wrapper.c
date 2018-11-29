@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <utils/Log.h>
 
 #define PACKAGE_LIST_PATH "/data/system/packages.list"
 #define PACKAGE_NAME_MAX_LEN (1<<16)

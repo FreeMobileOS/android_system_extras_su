@@ -15,27 +15,17 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/uio.h>
-#include <sys/un.h>
-#include <sys/wait.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <limits.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <getopt.h>
-#include <stdint.h>
 #include <pwd.h>
+#include <stdlib.h>
 #include <sys/stat.h>
-#include <stdarg.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include <cutils/android_filesystem_config.h>
+#include <cutils/properties.h>
 #include <log/log.h>
-#include <private/android_filesystem_config.h>
 
 #include "su.h"
 #include "utils.h"
