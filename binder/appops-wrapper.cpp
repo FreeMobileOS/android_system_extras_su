@@ -3,7 +3,8 @@
 #include <binder/AppOpsManager.h>
 #include <log/log.h>
 
-using namespace android;
+using android::AppOpsManager;
+using android::String16;
 
 extern "C" {
 
