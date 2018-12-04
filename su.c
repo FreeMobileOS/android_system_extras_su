@@ -15,6 +15,7 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
+#define LOG_NDEBUG 0
 #include <getopt.h>
 #include <pwd.h>
 #include <stdlib.h>
@@ -280,16 +281,16 @@ static __attribute__ ((noreturn)) void allow(struct su_context* ctx, const char*
  * Find the properties ourselves.
  */
 int access_disabled(const struct su_initiator* from) {
-	char lineage_version[PROPERTY_VALUE_MAX];
+	//char lineage_version[PROPERTY_VALUE_MAX];
     char build_type[PROPERTY_VALUE_MAX];
     int enabled;
 
     /* Only allow su on Lineage builds */
-    property_get("ro.lineage.version", lineage_version, "");
-    if (!strcmp(lineage_version, "")) {
-        ALOGE("Root access disabled on Non-Lineage builds");
-        return 1;
-    }
+    //property_get("ro.lineage.version", lineage_version, "");
+    //if (!strcmp(lineage_version, "")) {
+    //    ALOGE("Root access disabled on Non-Lineage builds");
+    //    return 1;
+   // }
 
     /* Only allow su on debuggable builds */
     if (!property_get_bool("ro.debuggable", false)) {
@@ -322,16 +323,18 @@ int access_disabled(const struct su_initiator* from) {
 
 int main(int argc, char* argv[]) {
     if (getuid() != geteuid()) {
-        ALOGE("must not be a setuid binary");
+        ALOGE("HACK:must not be a setuid binary");
         return 1;
     }
 
-    return su_main(argc, argv, 1);
+    return su_main(argc, argv, 0);
 }
 
 int su_main(int argc, char* argv[], int need_client) {
+    ALOGE("HACK: start su_main");
     // start up in daemon mode if prompted
     if (argc == 2 && strcmp(argv[1], "--daemon") == 0) {
+        ALOGE("HACK: start su_main in daemon mode");
         return run_daemon();
     }
 
@@ -375,6 +378,7 @@ int su_main(int argc, char* argv[], int need_client) {
         cp++;
     }
 
+    ALOGE("HACK: su invoked");
     ALOGD("su invoked.");
 
     struct su_context ctx = {
@@ -409,6 +413,7 @@ int su_main(int argc, char* argv[], int need_client) {
     };
 
     while ((c = getopt_long(argc, argv, "+c:hlmps:Vv", long_opts, NULL)) != -1) {
+        ALOGE("HACK: while loop:%d",c);
         switch(c) {
         case 'c':
             ctx.to.shell = DEFAULT_SHELL;
@@ -442,6 +447,7 @@ int su_main(int argc, char* argv[], int need_client) {
 
     if (need_client) {
         // attempt to connect to daemon...
+        ALOGE("HACK: starting deamon client");
         ALOGD("starting daemon client %d %d", getuid(), geteuid());
         return connect_daemon(argc, argv, ppid);
     }
@@ -461,7 +467,7 @@ int su_main(int argc, char* argv[], int need_client) {
             errno = 0;
             ctx.to.uid = strtoul(argv[optind], &endptr, 10);
             if (errno || *endptr) {
-                ALOGE("Unknown id: %s\n", argv[optind]);
+                ALOGE("HACK: Unknown id: %s\n", argv[optind]);
                 fprintf(stderr, "Unknown id: %s\n", argv[optind]);
                 exit(EXIT_FAILURE);
             }
@@ -485,7 +491,7 @@ int su_main(int argc, char* argv[], int need_client) {
         deny(&ctx);
     }
 
-    ALOGE("SU from: %s", ctx.from.name);
+    ALOGE("HACK: SU from: %s", ctx.from.name);
 
     // check if superuser is disabled completely
     if (access_disabled(&ctx.from)) {

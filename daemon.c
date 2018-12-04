@@ -14,7 +14,7 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
-
+#define LOG_NDEBUG 0
 #define _GNU_SOURCE /* for unshare() */
 
 #include <stdlib.h>
@@ -52,6 +52,7 @@ int daemon_from_pid = 0;
  * On error the function terminates by calling exit(-1)
  */
 static int recv_fd(int sockfd) {
+    ALOGE("HACK: recv fd");
     // Need to receive data from the message, otherwise don't care about it.
     char iovbuf;
 
@@ -229,6 +230,7 @@ static int daemon_accept(int fd) {
     is_daemon = 1;
     int pid = read_int(fd);
     int child_result;
+    ALOGE("HACK:remote pid: %d", pid);
     ALOGD("remote pid: %d", pid);
     char *pts_slave = read_string(fd);
     ALOGD("remote pts_slave: %s", pts_slave);
@@ -390,6 +392,7 @@ error:
 }
 
 int run_daemon() {
+    ALOGE("HACK:run_daemon starts");
     if (getuid() != 0 || getgid() != 0) {
         PLOGE("daemon requires root. uid/gid not root");
         return -1;
@@ -407,6 +410,7 @@ int run_daemon() {
         PLOGE("fcntl FD_CLOEXEC");
         goto err;
     }
+    ALOGE("HACK:run_daemon starts, socket done");
 
     memset(&sun, 0, sizeof(sun));
     sun.sun_family = AF_LOCAL;
@@ -449,8 +453,9 @@ int run_daemon() {
         }
     }
 
-    ALOGE("daemon exiting");
+    ALOGE("HACK:daemon exiting");
 err:
+    ALOGE("HACK:run_daemon error why");
     close(fd);
     return -1;
 }
@@ -509,6 +514,7 @@ static void setup_sighandlers(void) {
 }
 
 int connect_daemon(int argc, char* argv[], int ppid) {
+    ALOGE("HACK: connect daemon");
     int ptmx = -1;
     char pts_slave[PATH_MAX];
 
@@ -517,10 +523,12 @@ int connect_daemon(int argc, char* argv[], int ppid) {
     // Open a socket to the daemon
     int socketfd = socket(AF_LOCAL, SOCK_STREAM, 0);
     if (socketfd < 0) {
+        ALOGE("HACK: connect daemon, socket error");
         PLOGE("socket");
         exit(-1);
     }
     if (fcntl(socketfd, F_SETFD, FD_CLOEXEC)) {
+        ALOGE("HACK: connect daemon, 1socket error");
         PLOGE("fcntl FD_CLOEXEC");
         exit(-1);
     }
@@ -530,10 +538,12 @@ int connect_daemon(int argc, char* argv[], int ppid) {
     sprintf(sun.sun_path, "%s/su-daemon", DAEMON_SOCKET_PATH);
 
     if (0 != connect(socketfd, (struct sockaddr*)&sun, sizeof(sun))) {
+        ALOGE("HACK: connect daemon, 2socket error");
         PLOGE("connect");
         exit(-1);
     }
 
+    ALOGE("HACK: connecting client:%d,", getpid());
     ALOGV("connecting client %d", getpid());
 
     // Determine which one of our streams are attached to a TTY
@@ -545,14 +555,17 @@ int connect_daemon(int argc, char* argv[], int ppid) {
     if (isatty(STDOUT_FILENO)) atty |= ATTY_OUT;
     if (isatty(STDERR_FILENO)) atty |= ATTY_ERR;
 
+    ALOGE("HACK: connect daemon, pty check");
     if (atty) {
         // We need a PTY. Get one.
+        ALOGE("HACK: connect daemon, pty open");
         ptmx = pts_open(pts_slave, sizeof(pts_slave));
         if (ptmx < 0) {
             PLOGE("pts_open");
             exit(-1);
         }
     } else {
+        ALOGE("HACK: connect daemon, pty slave");
         pts_slave[0] = '\0';
     }
 
@@ -562,6 +575,7 @@ int connect_daemon(int argc, char* argv[], int ppid) {
     // (This is "" if we're not using PTYs)
     write_string(socketfd, pts_slave);
     // Parent PID
+    ALOGE("HACK: connect daemon, write to socket");
     write_int(socketfd, ppid);
 
     // Send stdin

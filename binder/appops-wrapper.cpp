@@ -1,3 +1,4 @@
+#define LOG_NDEBUG 0
 #define LOG_TAG "su"
 
 #include <binder/AppOpsManager.h>
